@@ -1,7 +1,8 @@
 import tuincord
-from tuincord import Status, OptionType, ChannelsType
+from tuincord import Status, OptionType
 
 from dotenv import dotenv_values
+import re
 
 TOKEN = dotenv_values(".env")["TOKEN"]
 
@@ -15,13 +16,22 @@ bot = tuincord.Bot(status=Status.idle)
 
 @bot.event
 async def on_ready():
-	print(f'Logged in')
-	print('------')
+    print(f'Logged in')
+    print('------')
 
-@bot.command(description="Upload a file to the CDN")
-@bot.option("file", "The file to be uploaded", OptionType.ATTACHMENT, required=True)
-async def upload(ctx, file):
-	pass
+
+@bot.command(description="Shorten a URL")
+@bot.option("url", "The URL to be shortened", OptionType.STRING, required=True)
+async def shorten(interaction, url):
+    match = re.search(
+        r"[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&\/\/=]*)",
+        url["value"]
+    )
+
+    if match:
+        await interaction.respond(url["value"])
+    else:
+        await interaction.respond("This is not an URL")
 
 bot.run(TOKEN)
 
