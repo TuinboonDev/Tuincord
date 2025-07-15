@@ -60,10 +60,13 @@ class ChannelsType():
 class Interaction():
     interaction_id = 0
     interaction_token = ""
+    # TODO: abstract to User object
+    user_id = 0
 
-    def __init__(self, interaction_id, interaction_token):
+    def __init__(self, interaction_id, interaction_token, user_id):
         self.interaction_id = interaction_id
         self.interaction_token = interaction_token
+        self.user_id = user_id
 
     async def respond(self, response):
         async with SESSION.post(
@@ -173,8 +176,16 @@ async def main(bot):
                     # TODO: Match by id
                     command = commands.get(data["d"]["data"]["name"])
                     if command:
+                        if data["d"]["channel"]["type"] == ChannelsType.DM:
+                            user_id = int(data["d"]["user"]["id"])
+                        else:
+                            user_id = int(data["d"]["member"]["user"]["id"])
+
                         interaction = Interaction(
-                            data["d"]["id"], data["d"]["token"])
+                                        data["d"]["id"], 
+                                        data["d"]["token"],
+                                        user_id
+                                    )
                         asyncio.create_task(
                             command(interaction, *data["d"]["data"]["options"]))
 
