@@ -76,7 +76,8 @@ class Interaction():
                 json={"type": 4, "data": {"content": response}},
                 headers={"Authorization": f"Bot {TOKEN}"}
         ) as response:
-            print(await response.text())
+            pass
+            # print(await response.text())
 
 
 class Bot():
@@ -117,7 +118,7 @@ class Bot():
         def decorator(func):
             self.__commands[func.__name__] = func
 
-            self.__options[func.__name__].reverse()
+            self.__options.setdefault(func.__name__, []).reverse()
             self.__command_map.append({
                 "name": func.__name__,
                 "type": 1,
@@ -157,7 +158,7 @@ async def main(bot):
         async for message in websocket:
             data = json.loads(message)
 
-            print(data["op"], data["t"], data)
+            # print(data["op"], data["t"], data)
 
             if data["op"] == 0:
                 if data["t"] == "READY":
@@ -168,8 +169,9 @@ async def main(bot):
                             json=bot.get_command_map(),
                             headers={"Authorization": f"Bot {TOKEN}"}
                     ) as response:
+                        pass
                         # TODO: handle response code
-                        print(await response.text())
+                        # print(await response.text())
 
                 if data["t"] == "INTERACTION_CREATE":
                     commands = bot.get_commands()
@@ -187,7 +189,7 @@ async def main(bot):
                                         user_id
                                     )
                         asyncio.create_task(
-                            command(interaction, *data["d"]["data"]["options"]))
+                            command(interaction, *data["d"]["data"].setdefault("options", [])))
 
                 event_listeners = bot.get_listeners().get(
                     "on_" + data["t"].lower())

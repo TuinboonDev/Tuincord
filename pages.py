@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect
+from flask import Blueprint, redirect, jsonify
 import json
 
 pages = Blueprint('pages', __name__)
@@ -19,3 +19,22 @@ def redirect_url(key):
             return redirect(original_url)
     
     return f"<h1>404 - URL not found</h1><p>The key '{key}' doesn't exist.</p>", 404
+
+@pages.route('/stats')
+def get_stats():
+    with open(MAP_FILENAME, "r") as f:
+        shortened_urls = json.load(f)
+
+    return jsonify({
+        "total_urls": len(shortened_urls),
+        "running": True,
+    })
+
+@pages.route('/urls')
+def list_urls():
+    with open(MAP_FILENAME, "r") as f:
+        shortened_urls = json.load(f)
+    return jsonify({
+        "total_urls": len(shortened_urls),
+        "urls": shortened_urls
+    })
